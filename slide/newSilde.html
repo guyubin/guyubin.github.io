@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>newSildeEva</title>
+    <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<style media="screen">
+    /** {
+    outline: thin dashed red;
+}*/
+
+    * {
+        margin: 0px;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .slide-container {
+        /*display: flex;*/
+        /*justify-content: center;
+        align-items: center;*/
+        width: 80%;
+        height: 40em;
+        position: relative;
+    }
+
+    .slide-button {
+        display: flex;
+        justify-content: space-between;
+        z-index: 50;
+        width: 100%;
+        text-align: center;
+        height: 100%;
+        font-size: 15em;
+        position: absolute;
+    }
+
+    .slide-button-prev {
+        display: flex;
+        /* vertical-align: middle; */
+        align-items: center;
+        color: transparent;
+        cursor: pointer;
+    }
+
+    .slide-button-prev:hover {
+        color: lightblue;
+        opacity: 0.7;
+    }
+
+    .slide-button-next {
+        display: flex;
+        /* vertical-align: middle; */
+        align-items: center;
+        color: transparent;
+        cursor: pointer;
+    }
+
+    .slide-button-next:hover {
+        color: lightblue;
+        opacity: 0.7;
+    }
+
+    .slide-indicator {
+        z-index: 51;
+        position: absolute;
+        bottom: 1em;
+        width: 100%;
+        text-align: center;
+    }
+
+    .slide-indicator-item {
+        display: inline-block;
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+        background: grey;
+        width: 1em;
+        /* height: 1em; */
+        text-align: center;
+        vertical-align: middle;
+        font-family: fantasy;
+        color: white;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .slide-img {
+        /*z-index: 20;
+    position: absolute;*/
+        top: 0;
+        left: 0;
+        height: 40em;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    img {
+        z-index: 20;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    img {
+        height: 40em;
+        width: 100%;
+        /*visibility: hidden;*/
+    }
+    /*.active {
+    visibility: visible;
+}*/
+
+    .active {
+        visibility: visible;
+    }
+
+    .transparent {
+        opacity: 0;
+    }
+
+    .active-dot {
+        background-color: pink;
+    }
+
+    * {
+        transition: all 1s;
+    }
+</style>
+
+<body>
+    <h1>hahahahahhahahahahahha</h1>
+    <div class="slide-container">
+        <div class="slide-button">
+            <div class="slide-button-prev">
+                < </div>
+                    <div class="slide-button-next"> > </div>
+            </div>
+            <div class="slide-indicator">
+                <!-- <div class="slide-indicator-item">1</div> -->
+            </div>
+            <div class="slide-img">
+                <!-- <div class="slide-img-item"><img src="img/EVA-Neon-Genesis-Evangelion_popt(42).jpg"></div> -->
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var log = function() {
+                console.log.apply(console, arguments)
+            }
+
+            var Slide = function(initList) {
+                this.list = initList
+                this.count = this.list.length
+                this.current = 0
+                this.intervalTime = 3000
+                this.aniID = 0
+            }
+
+            Slide.prototype.init = function() {
+                var slideImg = document.querySelector('.slide-img')
+                var slideIndicator = document.querySelector('.slide-indicator')
+                for (var i = 0; i < this.count; i++) {
+                    var t1 = `<div class="slide-img-item"><img src="${this.list[i]}"></div>`
+                    var t2 = `<div class="slide-indicator-item">${i + 1}</div>`
+                    slideImg.insertAdjacentHTML('beforeend', t1)
+                    slideIndicator.insertAdjacentHTML('beforeend', t2)
+                }
+            }
+
+            Slide.prototype.slideflow = function(activeIndex) {
+                log('activeIndex', activeIndex)
+                var allClass = 'active transparent'
+                $('.slide-img-item').removeClass(allClass)
+                $('.active-dot').removeClass('active-dot')
+                $($('.slide-indicator-item')[activeIndex]).addClass('active-dot')
+
+                $('.slide-img-item').addClass('transparent')
+                $($('.slide-img-item')[activeIndex]).removeClass('transparent')
+                $($('.slide-img-item')[activeIndex]).addClass('active')
+            }
+
+            Slide.prototype.bindEventToButton = function() {
+                var slideButton = document.querySelector('.slide-button')
+                slideButton.addEventListener("click", (function(event) {
+                    var target = event.target
+                    if (target.classList.contains('slide-button-prev')) {
+                        this.current = (this.current - 1 + this.count) % this.count
+                        this.slideflow(this.current)
+                    }
+                    if (target.classList.contains('slide-button-next')) {
+                        this.current = (this.current + 1 + this.count) % this.count
+                        this.slideflow(this.current)
+                    }
+                }).bind(this))
+            }
+
+            Slide.prototype.bindEventToIndicator = function() {
+                log('bindindicator')
+                var indicator = document.querySelector('.slide-indicator')
+                indicator.addEventListener('click', (function(event) {
+                    log('click')
+                    var target = event.target
+                    if (target.classList.contains('slide-indicator-item')) {
+                        this.current = Number(target.innerHTML) - 1
+                        this.slideflow(this.current)
+                    }
+                }).bind(this))
+            }
+
+            Slide.prototype.setAnimation = function() {
+                this.aniID = setInterval((function() {
+                    this.current = (this.current + 1 + this.count) % this.count
+                    this.slideflow(this.current)
+                }).bind(this), this.intervalTime)
+            }
+
+            Slide.prototype.mouseInAndMouseOut = function() {
+
+                var that = this
+                $('.slide-container').hover((function() {
+                    /*
+                     hover hover() 方法规定当鼠标指针悬停在被选元素上时要运行的两个函数。
+                     jQuery 1.7 版本前该方法触发 mouseenter 和 mouseleave 事件。
+                     jQuery 1.8 版本后该方法触发 mouseover 和 mouseout 事件。
+                    */
+                    clearInterval(this.aniID)
+                }).bind(this), (that.setAnimation).bind(this))
+            }
+
+
+            var __main = function() {
+                var initList = [
+                    "img/1.jpg",
+                    "img/2.jpg",
+                    "img/3.jpg",
+                    // "img/4.jpg",
+                    // "img/5.jpg",
+                    // "img/6.jpg",
+                    // "img/7.jpg",
+                ]
+                var slideObject = new Slide(initList)
+
+                slideObject.init()
+                slideObject.slideflow(slideObject.current)
+                slideObject.bindEventToButton()
+                slideObject.bindEventToIndicator()
+                slideObject.setAnimation()
+                slideObject.mouseInAndMouseOut()
+
+            }
+
+            __main()
+        </script>
+</body>
+
+</html>
